@@ -1,0 +1,15 @@
+{
+  "name": "retweet-bot",
+  "version": "1.0.0",
+  "description": "A non-smart retweet bot that retweets for whichever person you ask it to.",
+  "main": "retweet.js",
+  "dependencies": {
+    "puppeteer": "^1.19.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shubham Thakur",
+  "license": "ISC"
+}
