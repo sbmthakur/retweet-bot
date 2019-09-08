@@ -5,58 +5,85 @@ const config = require('./config.json');
   const user_name = config.username;
   const password = config.password;
 
-  const browser = await puppeteer.launch({
+  let browser, page;
+
+  let launchOptions = {
     headless: true,
     devtools: false,
-    args: ['--no-sandbox']
-  });
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  };
 
-  const page = await browser.newPage();
-  // open twitter
-  await page.goto('https://twitter.com/login');
-
-  // Login
-  await page.$eval('.js-username-field.email-input.js-initial-focus', (e, uName) => e.value = uName, user_name)
-  await page.$eval('.js-password-field', (e, pwd) => e.value = pwd, password)
-  await page.click('.submit.EdgeButton.EdgeButton--primary.EdgeButtom--medium')
-
-  // wait till page load
-  await page.waitForNavigation();
-
-  let newPage = await browser.newPage();
-  let retweetSel = '[data-testid="retweet"]';
-
-  let targetHandle = config.handle; 
-  await newPage.goto(`https://twitter.com/${targetHandle}`);
-
-  await newPage.waitFor(retweetSel);
-
-  let totalTweets = await newPage.$$eval(retweetSel, e => e.length);
-
-  console.log('total tweets: ', totalTweets);
-  for(let i = 0; i < totalTweets; i++){
-    try {
-      console.log('clicking 1')
-
-      await newPage.$$eval(retweetSel, (ele, index) => {
-        console.log('inside 1')
-        ele[index].click()
-      }, i);
-
-      console.log('clicked 1')
-      let retweetConfirm = '[data-testid="retweetConfirm"]';
-      await newPage.waitFor(500);
-      console.log('clicking 2')
-      await newPage.$eval(retweetConfirm, e => {
-        e.click()
-      });
-
-      console.log('clicked 2')
-    } catch(err) {
-      console.log(`Retweet failed for ${i+1} tweet`);
-      console.log(`Logging err: ${err}`);
-    }
+  if(config.executablePath) {
+    launchOptions.executablePath = config.executablePath; 
   }
 
-  await browser.close();
+  browser = await puppeteer.launch(launchOptions);
+
+  try {
+    page = await browser.newPage();
+    // open twitter
+    await page.goto('https://twitter.com/login');
+
+    // Login
+    await page.$eval('.js-username-field.email-input.js-initial-focus', (e, uName) => e.value = uName, user_name)
+    await page.$eval('.js-password-field', (e, pwd) => e.value = pwd, password)
+    await page.click('.submit.EdgeButton.EdgeButton--primary.EdgeButtom--medium')
+
+    // wait till page load
+    await page.waitForNavigation();
+  } catch(err) {
+    await handleError(page, err);
+  }
+
+  let newPage;
+
+  try {
+    newPage = await browser.newPage();
+    let retweetSel = '[data-testid="retweet"]';
+
+    let targetHandle = config.handle; 
+    await newPage.goto(`https://twitter.com/${targetHandle}`);
+
+    await newPage.waitFor(retweetSel);
+
+    let totalTweets = await newPage.$$eval(retweetSel, e => e.length);
+
+    console.log('total tweets: ', totalTweets);
+    for(let i = 0; i < totalTweets; i++){
+      try {
+        console.log('clicking 1')
+
+        await newPage.$$eval(retweetSel, (ele, index) => {
+          console.log('inside 1')
+          ele[index].click()
+        }, i);
+
+        console.log('clicked 1')
+        let retweetConfirm = '[data-testid="retweetConfirm"]';
+        await newPage.waitFor(500);
+        console.log('clicking 2')
+        await newPage.$eval(retweetConfirm, e => {
+          e.click()
+        });
+
+        console.log('clicked 2')
+      } catch(err) {
+        console.log(`Retweet failed for ${i+1} tweet`);
+        console.log(`Logging err: ${err}`);
+      }
+    }
+  } catch(err) {
+    await handleError(newPage, err);
+  } finally {
+    await browser.close();
+  }
+
+  async function handleError(page, err) {
+    let dString = (new Date).toISOString();
+    console.log(`Error at ${dString}: ${err.message}`);
+    await newPage.screenshot({
+      path: `./${dString}.png`,
+      fullPage: true
+    });
+  }
 })();
