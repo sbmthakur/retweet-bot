@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const config = require('./config.json');
 
 (async function() {
@@ -27,14 +27,14 @@ const config = require('./config.json');
     // Login
     await page.$eval('.js-username-field.email-input.js-initial-focus', (e, uName) => e.value = uName, user_name)
     await page.$eval('.js-password-field', (e, pwd) => e.value = pwd, password)
-    await page.click('.submit.EdgeButton.EdgeButton--primary.EdgeButtom--medium')
-
+    await page.$eval('form.signin', e => e.submit());
     // wait till page load
     await page.waitForNavigation();
   } catch(err) {
     await handleError(page, err);
   }
 
+  await page.close(); 
   let newPage;
 
   try {
@@ -81,7 +81,7 @@ const config = require('./config.json');
   async function handleError(page, err) {
     let dString = (new Date).toISOString();
     console.log(`Error at ${dString}: ${err.message}`);
-    await newPage.screenshot({
+    await page.screenshot({
       path: `./${dString}.png`,
       fullPage: true
     });
