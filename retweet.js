@@ -30,11 +30,6 @@ const config = require('./config.json');
     await page.$eval('form.signin', e => e.submit());
     // wait till page load
     await page.waitForNavigation();
-  } catch(err) {
-    await handleError(page, err);
-  }
-
-  try {
     let retweetSel = '[data-testid="retweet"]';
 
     let targetHandle = config.handle; 
@@ -50,7 +45,6 @@ const config = require('./config.json');
         console.log('clicking 1')
 
         await page.$$eval(retweetSel, (ele, index) => {
-          console.log('inside 1')
           ele[index].click()
         }, i);
 
