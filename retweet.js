@@ -34,35 +34,31 @@ const config = require('./config.json');
     await handleError(page, err);
   }
 
-  await page.close(); 
-  let newPage;
-
   try {
-    newPage = await browser.newPage();
     let retweetSel = '[data-testid="retweet"]';
 
     let targetHandle = config.handle; 
-    await newPage.goto(`https://twitter.com/${targetHandle}`);
+    await page.goto(`https://twitter.com/${targetHandle}`);
 
-    await newPage.waitFor(retweetSel);
+    await page.waitFor(retweetSel);
 
-    let totalTweets = await newPage.$$eval(retweetSel, e => e.length);
+    let totalTweets = await page.$$eval(retweetSel, e => e.length);
 
     console.log('total tweets: ', totalTweets);
     for(let i = 0; i < totalTweets; i++){
       try {
         console.log('clicking 1')
 
-        await newPage.$$eval(retweetSel, (ele, index) => {
+        await page.$$eval(retweetSel, (ele, index) => {
           console.log('inside 1')
           ele[index].click()
         }, i);
 
         console.log('clicked 1')
         let retweetConfirm = '[data-testid="retweetConfirm"]';
-        await newPage.waitFor(500);
+        await page.waitFor(500);
         console.log('clicking 2')
-        await newPage.$eval(retweetConfirm, e => {
+        await page.$eval(retweetConfirm, e => {
           e.click()
         });
 
@@ -73,7 +69,7 @@ const config = require('./config.json');
       }
     }
   } catch(err) {
-    await handleError(newPage, err);
+    await handleError(page, err);
   } finally {
     await browser.close();
   }
