@@ -1,6 +1,11 @@
 const puppeteer = require('puppeteer-core');
 const config = require('./config.json');
 
+let timeout = setTimeout(() => {
+   console.log('exiting forcefully');
+   process.exit(1);
+}, 120000);
+
 (async function() {
   const user_name = config.username;
   const password = config.password;
@@ -77,6 +82,7 @@ const config = require('./config.json');
     await handleError(page, err);
   } finally {
     await browser.close();
+    clearTimeout(timeout);
   }
 
   async function handleError(page, err) {
