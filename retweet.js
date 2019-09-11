@@ -25,14 +25,25 @@ const config = require('./config.json');
     await page.goto('https://twitter.com/login');
 
     // Login
-    await page.$eval('.js-username-field.email-input.js-initial-focus', (e, uName) => e.value = uName, user_name)
-    await page.$eval('.js-password-field', (e, pwd) => e.value = pwd, password)
+    await page.$eval('.js-username-field', (e, uName) => e.value = uName, user_name);
+    await page.$eval('.js-password-field', (e, pwd) => e.value = pwd, password);
     await page.$eval('form.signin', e => e.submit());
     // wait till page load
     await page.waitForNavigation();
     let retweetSel = '[data-testid="retweet"]';
 
-    let targetHandle = config.handle; 
+    let targetHandle;
+
+    if(config.handle) {
+      targetHandle = config.handle; 
+    } else {
+      // Select a random handle
+      let handles = config.handles;
+      let randomIndex = Math.floor(Math.random() * handles.length);
+      targetHandle = config.handles[randomIndex]; 
+    } 
+
+    console.log(`Handle selected: ${targetHandle}`);
     await page.goto(`https://twitter.com/${targetHandle}`);
 
     await page.waitFor(retweetSel);
