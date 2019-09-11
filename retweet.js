@@ -2,8 +2,9 @@ const puppeteer = require('puppeteer-core');
 const config = require('./config.json');
 
 let timeout = setTimeout(() => {
-   console.log('exiting forcefully');
-   process.exit(1);
+  console.log('exiting forcefully');
+  /*eslint-disable no-undef*/
+  process.exit(1);
 }, 120000);
 
 (async function() {
@@ -19,7 +20,7 @@ let timeout = setTimeout(() => {
   };
 
   if(config.executablePath) {
-    launchOptions.executablePath = config.executablePath; 
+    launchOptions.executablePath = config.executablePath;
   }
 
   browser = await puppeteer.launch(launchOptions);
@@ -40,13 +41,13 @@ let timeout = setTimeout(() => {
     let targetHandle;
 
     if(config.handle) {
-      targetHandle = config.handle; 
+      targetHandle = config.handle;
     } else {
       // Select a random handle
       let handles = config.handles;
       let randomIndex = Math.floor(Math.random() * handles.length);
-      targetHandle = config.handles[randomIndex]; 
-    } 
+      targetHandle = config.handles[randomIndex];
+    }
 
     console.log(`Handle selected: ${targetHandle}`);
     await page.goto(`https://twitter.com/${targetHandle}`);
@@ -58,21 +59,21 @@ let timeout = setTimeout(() => {
     console.log('total tweets: ', totalTweets);
     for(let i = 0; i < totalTweets; i++){
       try {
-        console.log('clicking 1')
+        console.log('clicking 1');
 
         await page.$$eval(retweetSel, (ele, index) => {
-          ele[index].click()
+          ele[index].click();
         }, i);
 
-        console.log('clicked 1')
+        console.log('clicked 1');
         let retweetConfirm = '[data-testid="retweetConfirm"]';
         await page.waitFor(500);
-        console.log('clicking 2')
+        console.log('clicking 2');
         await page.$eval(retweetConfirm, e => {
-          e.click()
+          e.click();
         });
 
-        console.log('clicked 2')
+        console.log('clicked 2');
       } catch(err) {
         console.log(`Retweet failed for ${i+1} tweet`);
         console.log(`Logging err: ${err}`);
